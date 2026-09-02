@@ -64,6 +64,11 @@ logger = logging.getLogger("eryu")
 # ── Secret management ────────────────────────────────────────────────────────
 
 def _load_or_create_secret() -> str:
+    # 优先读环境变量（Vercel / 容器部署下文件系统只读，写不了 .secret）
+    env_token = os.environ.get("SHARED_SECRET", "").strip()
+    if env_token:
+        logger.info("Using SHARED_SECRET from environment")
+        return env_token
     secret_file = HERE / ".secret"
     try:
         if secret_file.exists():
